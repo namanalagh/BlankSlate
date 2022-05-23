@@ -149,13 +149,25 @@ public class MeshGenerator : MonoBehaviour
     {
         if (forward || back)
         {
-            for (int i = vertIndex + (xSize*buildOffset) - (Mathf.RoundToInt(morphRange/2)) + buildOffset; i < vertIndex + (morphRange/2) + (xSize*buildOffset) + buildOffset; i++)
-                vertices[i] += new Vector3(0, y, 0);
+            for (int i = vertIndex + (xSize * buildOffset) - (Mathf.RoundToInt(morphRange / 2)) + buildOffset;
+                i < vertIndex + (morphRange / 2) + (xSize * buildOffset) + buildOffset;
+                i++)
+            {
+                //vertices[i] += new Vector3(0, y, 0);
+                Vector3 riseToPoint = vertices[i] + new Vector3(0, y, 0);
+                vertices[i] = Vector3.Slerp(vertices[i] , riseToPoint, 2);
+            }
         }
         else
         {
-            for (int i = vertIndex + buildOffset - (xSize+1) * (Mathf.RoundToInt(morphRange / 2)); i < vertIndex + buildOffset + (xSize+1) * (Mathf.RoundToInt(morphRange / 2)); i+=(xSize+1))
+            for (int i = vertIndex + buildOffset - (xSize + 1) * (Mathf.RoundToInt(morphRange / 2));
+                i < vertIndex + buildOffset + (xSize + 1) * (Mathf.RoundToInt(morphRange / 2));
+                i += (xSize + 1))
+            {
                 vertices[i] += new Vector3(0, y, 0);
+                Vector3 riseToPoint = vertices[i] + new Vector3(0, y, 0);
+                vertices[i] = Vector3.Slerp(vertices[i] , riseToPoint, 2);
+            }
         }
     }
 
