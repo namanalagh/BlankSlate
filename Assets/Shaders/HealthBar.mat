@@ -25,6 +25,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _Amplitude: 0.31
+    - _BorderWidth: 0.15
     - _Frequency: 4
     - _Health: 1
     - _LowHealth: 0.3
