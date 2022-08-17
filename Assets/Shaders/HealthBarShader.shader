@@ -65,17 +65,20 @@ Shader "Unlit/HealthBarShader"
                 //float tHealthColor = saturate(InverseLerp(_LowThreshold,_UpThreshold,_Health));
                 float3 healthBarColor = tex2D(_MainTex,float2(_Health,i.uv.y));
 
-                float flash = cos(_Time.y*_Frequency* (_Health<_LowHealth))*_Amplitude;
+                float flash = cos(_Time.y*_Frequency* (_Health<_LowHealth))*_Amplitude+1;
                 
                 //float3 healthBarColor = lerp(_ColorB,_ColorA,tHealthColor);
                 float3 bgColor = float3(0,0,0);
                 float healthBarMask = _Health > i.uv.x;
 
-                clip(healthBarMask-0.5);
-                
-                //float3 outColor = lerp(bgColor,healthBarColor,healthBarMask);
+                healthBarColor *= flash;
 
-                return float4(healthBarColor*flash*healthBarMask,1);
+                clip(healthBarMask-0.5);
+                float2 coords = float2(i.uv.x*8,i.uv.y);
+                float2 pointOnLineSeg = float2(coords.x,0.5); 
+                //float3 outColor = lerp(bgColor,healthBarColor,healthBarMask);
+                return float4(coords,0,1);
+                return float4(healthBarColor*healthBarMask,1);
                 //return float4(healthBarColor.rgb * healthBarMask,1);
                 
             }

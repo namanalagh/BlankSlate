@@ -55,6 +55,7 @@
      <Compile Include="Assets\Scripts\MeshGenerator.cs" />
      <Compile Include="Assets\Scripts\MouseLook.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
+     <None Include="Assets\Shaders\SDF.shader" />
      <None Include="Assets\Shaders\Shader1.shader" />
      <None Include="Assets\Shaders\HealthBarShader.shader" />
  <Reference Include="UnityEngine">
