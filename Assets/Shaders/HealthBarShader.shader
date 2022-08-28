@@ -46,7 +46,7 @@ Shader "Unlit/HealthBarShader"
             };
 
             sampler2D _MainTex;
-            float _Health;
+            float _HoldTime;
             float _LowHealth;
 
             Interpolators vert (MeshData v)
@@ -65,13 +65,13 @@ Shader "Unlit/HealthBarShader"
             float4 frag (Interpolators i) : SV_Target
             {
                 //float tHealthColor = saturate(InverseLerp(_LowThreshold,_UpThreshold,_Health));
-                float3 healthBarColor = tex2D(_MainTex,float2(_Health,i.uv.y));
+                float3 healthBarColor = tex2D(_MainTex,float2(_HoldTime,i.uv.y));
 
-                float flash = cos(_Time.y*_Frequency* (_Health<_LowHealth))*_Amplitude+1;
+                float flash = cos(_Time.y*_Frequency* (_HoldTime<_LowHealth))*_Amplitude+1;
                 
                 //float3 healthBarColor = lerp(_ColorB,_ColorA,tHealthColor);
                 float3 bgColor = float4(0,0,0,0);
-                float healthBarMask = _Health > i.uv.x;
+                float healthBarMask = _HoldTime > i.uv.x;
 
                 healthBarColor *= flash;
 
@@ -81,8 +81,9 @@ Shader "Unlit/HealthBarShader"
                 float2 pointOnLineSeg = float2(clamp(coords.x,0.5,7.5),0.5);
                 float sdf = distance(coords,pointOnLineSeg)*2-1;
                 float border = sdf + _BorderWidth;
-                float borderMask = step(0,-border);
                 clip(-sdf);
+                float pd = fwidth(border);
+                float borderMask = 1-saturate(border/pd);
                 //return float4(borderMask.xxx,1);
                 float3 outColor = lerp(bgColor,healthBarColor,1);
                 return float4(outColor*borderMask*healthBarMask,1);

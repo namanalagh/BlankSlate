@@ -5,22 +5,26 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField, Range(1, 100)] float UserSpeed = 12f;
-    [SerializeField, Range(0, 2)] float shootCooldown = .7f;
+    //[SerializeField, Range(0, 2)] float shootCooldown = .7f;
+    [SerializeField, Range(1, 10)] float maxJumpHoldTime = 4f;
 
-    public int damage = 2;
-    public int magCapacity = 6;
-    public int totalAmmo = 36;
-    public int bulletCount;
+    //public int damage = 2;
+    //public int magCapacity = 6;
+    //public int totalAmmo = 36;
+    //public int bulletCount;
     public bool isGrounded;
-    public bool canShoot;
+    //public bool canShoot;
     public float gravity = -9.81f;
     public float groundDistance = 0.4f;
-    public float reloadTime = 3f;
-
+    //public float reloadTime = 3f;
+    public float maxJumpForce = 50f;
+    
+    public GameObject image;
+    public Material jumpBarMat;
     //public Transform firePoint;
     public Transform groundCheck;
     //private CameraShake cameraShake;
-    public GameObject cam;
+    //public GameObject cam;
     //public GameObject reloadText;
     public CharacterController controller;
 
@@ -28,15 +32,19 @@ public class PlayerController : MonoBehaviour
     //public LayerMask enemyMask;
 
     private float speed;
+    private float jumpHoldStartTime;
+    private float jumpHoldTimeNormalized;
 
     private Vector3 velocity;
+    private static readonly int HoldTime = Shader.PropertyToID("_HoldTime");
 
     private void Start()
     {
         speed = UserSpeed;
+        image.SetActive(false);
         //cameraShake = cam.GetComponent<CameraShake>();
         //cameraShake.enabled = false;
-        bulletCount = magCapacity;
+        //bulletCount = magCapacity;
     }
 
     void Update()
@@ -51,6 +59,29 @@ public class PlayerController : MonoBehaviour
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            image.SetActive(true);
+            jumpHoldStartTime = Time.time;
+        }
+
+        jumpBarMat.SetFloat(HoldTime, (Time.time - jumpHoldStartTime) / maxJumpHoldTime);
+
+        if (!isGrounded)
+        {    
+            image.SetActive(false);
+            jumpHoldStartTime = Time.time;
+        }
+
+    if (Input.GetKeyUp(KeyCode.Space) && isGrounded)
+        {
+            float jumpHoldTime = Time.time - jumpHoldStartTime;
+            
+            image.SetActive(false);
+            velocity.y = CalculateMaxJumpForce(jumpHoldTime);
+        }
+        
+        
         if (Input.GetKey(KeyCode.LeftShift))
         {
             speed = UserSpeed / 2;
@@ -80,7 +111,7 @@ public class PlayerController : MonoBehaviour
         // {
         //     Shoot();
         //     //cameraShake.enabled = true;
-        //     StartCoroutine(ShootCooldwon());
+        //     StartCoroutine(ShootCooldown());
         //     //cameraShake.enabled = false;
         // }
         //
@@ -92,12 +123,21 @@ public class PlayerController : MonoBehaviour
         Vector3 move = transform.right * x + transform.forward * z;
 
         controller.Move(move * speed * Time.deltaTime);
-
         velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
     }
-    
+
+    private float CalculateMaxJumpForce(float holdTime)
+    {
+        jumpHoldTimeNormalized = Mathf.Clamp01(holdTime / maxJumpHoldTime);
+        //jumpBarMat.SetFloat(HoldTime,jumpHoldTimeNormalized);
+        float force = 0.2f * maxJumpForce;
+        if (holdTime>=1f)
+            force = jumpHoldTimeNormalized * maxJumpForce;
+        
+        return force;
+    }
     // private void Shoot()
     // {
     //     Debug.DrawRay(firePoint.position, firePoint.forward * 100, Color.red, .5f);
@@ -138,7 +178,7 @@ public class PlayerController : MonoBehaviour
     //     reloadText.SetActive(false);
     //     canShoot = true;
     // }
-    // IEnumerator ShootCooldwon()
+    // IEnumerator ShootCooldown()
     // {
     //     canShoot = false;
     //     cameraShake.enabled = true;

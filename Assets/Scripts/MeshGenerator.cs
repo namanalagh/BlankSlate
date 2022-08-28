@@ -13,15 +13,11 @@ public class MeshGenerator : MonoBehaviour
     [Range(1,200)]
     public int zSize = 20;
 
-    public float scale;
-    
     public int xPos;
     public int zPos;
     public int vertIndex;
     [Range(0,4)]
     public int morphRange;
-
-    public float yRotation;
 
     public Transform player;
     public Gradient gradient;
@@ -35,7 +31,7 @@ public class MeshGenerator : MonoBehaviour
     [Range(0,3)]
     public int y = 0;
     public float heightMultiplier;
-
+    public float headingAngle;
     private int buildOffset;
 
     public bool forward;
@@ -43,6 +39,8 @@ public class MeshGenerator : MonoBehaviour
     public bool left;
     public bool right;
 
+    public Vector3 playerForward;
+    
     private float minTerrainHeight;
     private float maxTerrainHeight;
 
@@ -58,7 +56,8 @@ public class MeshGenerator : MonoBehaviour
 
     private void Update()
     {
-        yRotation = player.transform.localEulerAngles.y;
+        playerForward = player.transform.forward;
+        headingAngle = Quaternion.LookRotation(playerForward).eulerAngles.y;
         CalculatePlayerCoords();
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -75,8 +74,8 @@ public class MeshGenerator : MonoBehaviour
         {
             UpdateMesh();
         }
-        RedrawMesh();
-        UpdateMeshCollider();
+        //RedrawMesh();
+        //UpdateMeshCollider();
     }
 
     void CreateMesh()
@@ -89,12 +88,12 @@ public class MeshGenerator : MonoBehaviour
             for (int x = 0; x <= xSize; x++)
             {
                 float height = Mathf.PerlinNoise(x * .3f, z * .3f) * heightMultiplier;
-                vertices[i] = new Vector3(x, height, z);
+                vertices[i] = new Vector3(x , height, z );
 
-                if (y > maxTerrainHeight)
-                    maxTerrainHeight = y;
-                if (y < minTerrainHeight)
-                    minTerrainHeight = y;
+                if (vertices[i].y > maxTerrainHeight)
+                    maxTerrainHeight = vertices[i].y;
+                if (vertices[i].y < minTerrainHeight)
+                    minTerrainHeight = vertices[i].y;
                 
                 i++;
             }
@@ -109,7 +108,7 @@ public class MeshGenerator : MonoBehaviour
         {
             for (int x = 0; x < xSize; x++)
             {
-                triangles[tris] = vert + 0;
+                triangles[tris] = vert + 0 ;
                 triangles[tris+1] = vert + xSize + 1;
                 triangles[tris+2] = vert + 1;
             
@@ -141,7 +140,7 @@ public class MeshGenerator : MonoBehaviour
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.colors = colors;
-        
+
         mesh.RecalculateNormals();
     }
 
@@ -202,7 +201,8 @@ public class MeshGenerator : MonoBehaviour
         if (vertices[vertIndex].y == 0)
             y = 0;
 
-        if ((-45 < yRotation && yRotation <= 0) || (0 <= yRotation && yRotation <= 45))
+        //if ((-45 < yRotation && yRotation <= 0) || (0 <= yRotation && yRotation <= 45))
+        if ((315 < headingAngle && headingAngle <= 360) || (0 <= headingAngle && headingAngle <= 45))
         {
             // forward
             forward = true;
@@ -211,7 +211,8 @@ public class MeshGenerator : MonoBehaviour
             left = false;
             buildOffset = 2;
         }
-        else if (45 < yRotation && yRotation <= 135)
+        //else if (45 < yRotation && yRotation <= 135)
+        else if (45 < headingAngle && headingAngle <= 135)
         {
             // right
             forward = false;
@@ -220,7 +221,8 @@ public class MeshGenerator : MonoBehaviour
             left = false;
             buildOffset = 2;
         }
-        else if ((135 < yRotation && yRotation <= 180) || (-180 < yRotation && yRotation <= -135))
+        //else if ((135 < yRotation && yRotation <= 180) || (-180 < yRotation && yRotation <= -135))
+        else if ((135 < headingAngle && headingAngle <= 180) || (-180 < headingAngle && headingAngle <= -135))
         {
             // back
             forward = false;
@@ -229,7 +231,8 @@ public class MeshGenerator : MonoBehaviour
             left = false;
             buildOffset = -2;
         }
-        else if (-135 < yRotation && yRotation <= 0)
+        //else if (-135 < yRotation && yRotation <= 0)
+        else if (270 < headingAngle && headingAngle <= 315)
         {
             // left
             forward = false;
